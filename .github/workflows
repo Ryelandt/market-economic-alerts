@@ -1,5 +1,4 @@
 name: Market Alerts
-
 on:
   schedule:
     - cron: "0 6 * * 1-5"
