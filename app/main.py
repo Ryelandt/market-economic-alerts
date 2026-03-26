@@ -1,6 +1,6 @@
 from app.sources.mock_calendar import fetch_events
 from app.core.decision_engine import score_event, classify_event
-from app.alerts.telegram_alert import send_alert
+from app.alerts.console_alert import send_alert
 
 def main():
     events = fetch_events()
