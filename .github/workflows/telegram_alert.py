@@ -2,7 +2,6 @@ import os
 import json
 import urllib.request
 
-
 def send_alert(event, level):
     bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
