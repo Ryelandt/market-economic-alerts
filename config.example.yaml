@@ -1,1 +1,8 @@
+assets:
+  - EURUSD
+  - XAUUSD
+  - BTCUSDT
 
+alert_levels:
+  - CRITICAL
+  - IMPORTANT
