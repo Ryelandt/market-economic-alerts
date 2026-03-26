@@ -13,4 +13,4 @@ def send_alert(event, level):
 
     message = (
         f"🚨 ALERTE {level}\n\n"
-        f"📅 {event.name}\n
+        f"📅 {event.name}\n"
