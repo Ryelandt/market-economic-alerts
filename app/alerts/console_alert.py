@@ -1,9 +1,13 @@
+import os
+import requests
+
 def send_alert(event, level):
-    print("\n==============================")
-    print(f"🚨 ALERT LEVEL: {level}")
-    print(f"📅 Event: {event.name}")
-    print(f"⏰ Time: {event.datetime}")
-    print("📊 Affected Assets:")
-    for asset in event.affected_assets:
-        print(f" - {asset}")
-    print("==============================\n")
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+
+    if not bot_token or not chat_id:
+        raise RuntimeError("Telegram credentials not set")
+
+    message = (
+        f"🚨 ALERTE {level}\n\n"
+        f"📅 {event.name}\n
