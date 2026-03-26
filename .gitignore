@@ -137,7 +137,7 @@ celerybeat.pid
 # Environments
 .env
 *.log
-data/
+__pycache__/
 .envrc
 .venv
 env/
