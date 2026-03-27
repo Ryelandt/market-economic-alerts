@@ -11,7 +11,7 @@ except Exception:
     # Fallback Windows sans tzdata
     PARIS_TZ = timezone(timedelta(hours=1))  # Europe/Paris standard
 
-SENT_ALERTS = set()
+
 
 def send_alert(event, level):
     
