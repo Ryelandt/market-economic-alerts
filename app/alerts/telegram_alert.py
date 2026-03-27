@@ -2,16 +2,24 @@ import os
 import json
 import urllib.request
 from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
+
+# Fuseau horaire robuste (Windows + Linux)
 try:
     from zoneinfo import ZoneInfo
-    # Fuseau explicite
     PARIS_TZ = ZoneInfo("Europe/Paris")
 except Exception:
-    # Fallback Windows sans tzdata
-    PARIS_TZ = timezone(timedelta(hours=1))  # Europe/Paris standard
+    PARIS_TZ = timezone(timedelta(hours=1))
+
+# Anti‑doublon simple par exécution
+_SENT_DAILY = False
+
 
 def send_daily_summary(events):
+    global _SENT_DAILY
+    if _SENT_DAILY:
+        return
+    _SENT_DAILY = True
+
     bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
@@ -19,26 +27,28 @@ def send_daily_summary(events):
         raise RuntimeError("Telegram credentials not set")
 
     if not events:
-        return  # Rien à signaler aujourd’hui
+        return  # Rien d’important aujourd’hui
 
-    # On trie par heure
-    events = sorted(events, key=lambda e: e.datetime)
+    # Tri par heure réelle Paris
+    events = sorted(
+        events,
+        key=lambda e: e.datetime.astimezone(PARIS_TZ)
+    )
 
     lines = []
     for e in events:
-        time_str = e.datetime.strftime("%H:%M")
-        lines.append(f"• {time_str} — {e.name}")
+        local_time = e.datetime.astimezone(PARIS_TZ)
+        lines.append(f"• {local_time.strftime('%H:%M')} — {e.name}")
 
     message = (
-        "📅 **AUJOURD’HUI — MACRO IMPORTANT**\n\n"
+        "📅 AUJOURD’HUI — MACRO IMPORTANT\n\n"
         + "\n".join(lines)
     )
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     payload = {
         "chat_id": chat_id,
-        "text": message,
-        "parse_mode": "Markdown"
+        "text": message
     }
 
     data = json.dumps(payload).encode("utf-8")
@@ -51,19 +61,18 @@ def send_daily_summary(events):
     with urllib.request.urlopen(req) as response:
         response.read()
 
+
 def send_alert(event, level):
-    
     bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
     if not bot_token or not chat_id:
         raise RuntimeError("Telegram credentials not set")
-    
-    # Temps actuel et événement en heure locale
+
     now = datetime.now(tz=PARIS_TZ)
     event_time = event.datetime.astimezone(PARIS_TZ)
 
-    # Alerte pré‑annonce (-30 min)
+    # Alerte −30 minutes
     if timedelta(minutes=0) <= (event_time - now) <= timedelta(minutes=30):
         prefix = "⏰ DANS 30 MINUTES\n\n"
     else:
@@ -74,19 +83,17 @@ def send_alert(event, level):
         f"🚨 ALERTE {level}\n\n"
         f"📅 {event.name}\n"
         f"⏰ {event_time.strftime('%d/%m %H:%M')}\n\n"
-        "Impact probable :\n"
+        "🎯 Actifs impactés :\n"
         + "\n".join(f"• {a}" for a in event.affected_assets)
     )
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-
     payload = {
         "chat_id": chat_id,
         "text": message
     }
 
     data = json.dumps(payload).encode("utf-8")
-
     req = urllib.request.Request(
         url,
         data=data,
