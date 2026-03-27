@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from app.models.event import EconomicEvent
 
