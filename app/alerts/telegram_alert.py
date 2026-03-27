@@ -6,6 +6,9 @@ import urllib.request
 def send_alert(event, level):
     bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    
+    print("BOT_TOKEN present:", bot_token is not None)
+    print("CHAT_ID present:", chat_id is not None)
 
     if not bot_token or not chat_id:
         raise RuntimeError("Telegram credentials not set")
