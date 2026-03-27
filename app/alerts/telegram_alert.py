@@ -1,11 +1,16 @@
 import os
 import json
 import urllib.request
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
+try:
+    from zoneinfo import ZoneInfo
+    # Fuseau explicite
+    PARIS_TZ = ZoneInfo("Europe/Paris")
+except Exception:
+    # Fallback Windows sans tzdata
+    PARIS_TZ = timezone(timedelta(hours=1))  # Europe/Paris standard
 
-# Fuseau explicite
-PARIS_TZ = ZoneInfo("Europe/Paris")
 
 
 def send_alert(event, level):
