@@ -1,0 +1,20 @@
+[
+  {
+    "name": "US CPI",
+    "datetime": "2026-03-27T14:30:00",
+    "country": "US",
+    "importance": 3,
+    "forecast": 3.2,
+    "actual": null,
+    "affected_assets": ["EURUSD", "XAUUSD", "BTCUSDT"]
+  },
+  {
+    "name": "FED Interest Rate Decision",
+    "datetime": "2026-03-27T20:00:00",
+    "country": "US",
+    "importance": 3,
+    "forecast": null,
+    "actual": null,
+    "affected_assets": ["EURUSD", "XAUUSD", "BTCUSDT"]
+  }
+]
