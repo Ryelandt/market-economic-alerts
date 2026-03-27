@@ -1,4 +1,4 @@
-from app.sources.mock_calendar import fetch_events
+from app.sources.auto_calendar import fetch_events
 from app.core.decision_engine import score_event, classify_event
 from app.alerts.telegram_alert import send_alert
 
