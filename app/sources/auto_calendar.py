@@ -5,7 +5,7 @@ import urllib.request
 from datetime import datetime
 from app.models.event import EconomicEvent
 
-BASE_URL = "https://api.stlouisfed.org/fred/release/dates"
+BASE_URL = "https://api.stlouisfed.org/fred/releases"
 
 
 def fetch_events():
@@ -17,7 +17,7 @@ def fetch_events():
     params = {
         "api_key": api_key,
         "file_type": "json",
-        "limit": 15
+        "limit": 30
     }
 
     url = f"{BASE_URL}?{urllib.parse.urlencode(params)}"
@@ -31,25 +31,25 @@ def fetch_events():
 
     events = []
 
-    for r in data.get("release_dates", []):
-        name = r["release_name"]
-        date_str = r["date"]
+    for r in data.get("releases", []):
+        name = r["name"]
 
-        # Exemple de mapping simple vers actifs
-        assets = []
+        # Mapping macro simple
         if "Consumer Price Index" in name:
             assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
+            importance = 3
         elif "Employment Situation" in name:
             assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
+            importance = 3
         else:
-            continue  # ignore le reste pour le moment
+            continue  # on ignore le bruit
 
         events.append(
             EconomicEvent(
                 name=name,
-                datetime=datetime.fromisoformat(date_str),
+                datetime=datetime.now(),  # FRED ne donne pas l’heure exacte
                 country="US",
-                importance=3,
+                importance=importance,
                 forecast=None,
                 actual=None,
                 affected_assets=assets
