@@ -1,24 +1,25 @@
 from datetime import datetime
 from app.models.event import EconomicEvent
 
+DATA_FILE = "app/data/economic_calendar.json"
+
 def fetch_events():
-    return [
-        EconomicEvent(
-            name="US CPI",
-            datetime=datetime(2026, 3, 26, 14, 30),
-            country="US",
-            importance=3,
-            forecast=3.1,
-            actual=None,
-            affected_assets=["EURUSD", "XAUUSD", "BTCUSDT"]
-        ),
-        EconomicEvent(
-            name="ECB Interest Rate Decision",
-            datetime=datetime(2026, 3, 26, 15, 45),
-            country="EU",
-            importance=3,
-            forecast=None,
-            actual=None,
-            affected_assets=["EURUSD"]
-        )
-    ]
+    events = []
+
+    with open(DATA_FILE, "r", encoding="utf-8") as f:
+        raw_events = json.load(f)
+
+    for e in raw_events:
+          events.append(
+                    EconomicEvent(
+                        name=e["name"],
+                        datetime=datetime.fromisoformat(e["datetime"]),
+                        country=e["country"],
+                        importance=e["importance"],
+                        forecast=e.get("forecast"),
+                        actual=e.get("actual"),
+                        affected_assets=e["affected_assets"]
+                    )
+                )
+
+    return events
