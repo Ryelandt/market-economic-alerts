@@ -2,22 +2,18 @@ import os
 import json
 import urllib.parse
 import urllib.request
-from datetime import datetime, date
+from datetime import datetime, date, time, timedelta, timezone
 from app.models.event import EconomicEvent
 
 FRED_BASE_URL = "https://api.stlouisfed.org/fred/releases"
 
+PARIS_TZ = timezone(timedelta(hours=1))
+
 
 def fetch_events():
-    """
-    Fetch macroeconomic events from FRED (official US source).
-    Falls back cleanly if API is unavailable.
-    Returns a list of EconomicEvent.
-    """
-
     api_key = os.getenv("FRED_API_KEY")
     if not api_key:
-        print("FRED_API_KEY not set, no automatic calendar available")
+        print("FRED_API_KEY not set")
         return []
 
     params = {
@@ -35,28 +31,27 @@ def fetch_events():
         print("FRED API error:", e)
         return []
 
-    events = []
     today = date.today()
+    events = []
 
     for r in data.get("releases", []):
         name = r.get("name", "")
 
-        # Filtrage strict : uniquement les événements vraiment market movers
+        # Mapping annonce → heure de publication
         if "Consumer Price Index" in name:
+            event_time = time(14, 30)
             assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
             importance = 3
+
         elif "Employment Situation" in name:
+            event_time = time(14, 30)
             assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
             importance = 3
+
         else:
-            continue  # ignore le bruit
+            continue  # bruit ignoré
 
-        # FRED ne fournit pas l’heure → on reste volontairement simple
-        event_datetime = datetime.now()
-
-        # Optionnel : ne garder que les événements du jour
-        if event_datetime.date() != today:
-            continue
+        event_datetime = datetime.combine(today, event_time, PARIS_TZ)
 
         events.append(
             EconomicEvent(
