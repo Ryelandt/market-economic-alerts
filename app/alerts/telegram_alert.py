@@ -11,15 +11,23 @@ except Exception:
     # Fallback Windows sans tzdata
     PARIS_TZ = timezone(timedelta(hours=1))  # Europe/Paris standard
 
-
+SENT_ALERTS = set()
 
 def send_alert(event, level):
+    
     bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
     if not bot_token or not chat_id:
         raise RuntimeError("Telegram credentials not set")
+        
+    # ✅ DÉ‑DUPLICATION (ICI)   
+    event_id = f"{event.name}-{event.datetime.date()}"
+    if event_id in SENT_ALERTS:
+    return  # alerte déjà envoyée
 
+    SENT_ALERTS.add(event_id)
+    
     # Temps actuel et événement en heure locale
     now = datetime.now(tz=PARIS_TZ)
     event_time = event.datetime.astimezone(PARIS_TZ)
