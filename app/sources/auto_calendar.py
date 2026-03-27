@@ -2,25 +2,31 @@ import os
 import json
 import urllib.parse
 import urllib.request
-from datetime import datetime
+from datetime import datetime, date
 from app.models.event import EconomicEvent
 
-BASE_URL = "https://api.stlouisfed.org/fred/releases"
+FRED_BASE_URL = "https://api.stlouisfed.org/fred/releases"
 
 
 def fetch_events():
+    """
+    Fetch macroeconomic events from FRED (official US source).
+    Falls back cleanly if API is unavailable.
+    Returns a list of EconomicEvent.
+    """
+
     api_key = os.getenv("FRED_API_KEY")
     if not api_key:
-        print("FRED_API_KEY not set")
+        print("FRED_API_KEY not set, no automatic calendar available")
         return []
 
     params = {
         "api_key": api_key,
         "file_type": "json",
-        "limit": 30
+        "limit": 50
     }
 
-    url = f"{BASE_URL}?{urllib.parse.urlencode(params)}"
+    url = f"{FRED_BASE_URL}?{urllib.parse.urlencode(params)}"
 
     try:
         with urllib.request.urlopen(url, timeout=10) as response:
@@ -30,11 +36,12 @@ def fetch_events():
         return []
 
     events = []
+    today = date.today()
 
     for r in data.get("releases", []):
-        name = r["name"]
+        name = r.get("name", "")
 
-        # Mapping macro simple
+        # Filtrage strict : uniquement les événements vraiment market movers
         if "Consumer Price Index" in name:
             assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
             importance = 3
@@ -42,12 +49,19 @@ def fetch_events():
             assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
             importance = 3
         else:
-            continue  # on ignore le bruit
+            continue  # ignore le bruit
+
+        # FRED ne fournit pas l’heure → on reste volontairement simple
+        event_datetime = datetime.now()
+
+        # Optionnel : ne garder que les événements du jour
+        if event_datetime.date() != today:
+            continue
 
         events.append(
             EconomicEvent(
                 name=name,
-                datetime=datetime.now(),  # FRED ne donne pas l’heure exacte
+                datetime=event_datetime,
                 country="US",
                 importance=importance,
                 forecast=None,
