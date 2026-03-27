@@ -37,20 +37,49 @@ def fetch_events():
     for r in data.get("releases", []):
         name = r.get("name", "")
 
-        # Mapping annonce → heure de publication
+      
+
+        # 🇺🇸 US — publications à 14h30
         if "Consumer Price Index" in name:
             event_time = time(14, 30)
-            assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
             importance = 3
-
+            assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
+        
         elif "Employment Situation" in name:
             event_time = time(14, 30)
-            assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
             importance = 3
-
+            assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
+        
+        elif "Retail Sales" in name:
+            event_time = time(14, 30)
+            importance = 2
+            assets = ["EURUSD", "XAUUSD"]
+        
+        # 🇪🇺 Europe — matin / début d’après‑midi
+        elif "ECB" in name or "European Central Bank" in name:
+            event_time = time(14, 15)
+            importance = 3
+            assets = ["EURUSD", "XAUUSD"]
+        
+        elif "Germany" in name and "Consumer Price" in name:
+            event_time = time(8, 00)
+            importance = 2
+            assets = ["EURUSD"]
+        
+        # 🇺🇸 Soir US
+        elif "FOMC Statement" in name:
+            event_time = time(20, 00)
+            importance = 3
+            assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
+        
+        elif "FOMC Press Conference" in name:
+            event_time = time(20, 30)
+            importance = 3
+            assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
+        
         else:
-            continue  # bruit ignoré
-
+            continue
+        
         event_datetime = datetime.combine(today, event_time, PARIS_TZ)
 
         events.append(
