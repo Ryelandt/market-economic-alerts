@@ -2,7 +2,6 @@ import requests
 import logging
 from datetime import datetime, timedelta
 from typing import List
-
 from app.models.event import Event
 
 logger = logging.getLogger(__name__)
@@ -29,29 +28,27 @@ class AutoCalendarSource:
             response.raise_for_status()
             data = response.json()
         except Exception as e:
-            logger.error(f"Calendar API error: {e}")
+            logger.error(f"API error: {e}")
             return []
 
-        events: List[Event] = []
+        events = []
 
         for item in data:
-            if item.get("country") not in {"US", "EU"}:
+            if item.get("country") not in ("US", "EU"):
                 continue
             if item.get("impact") != "High":
                 continue
 
-            currency = "USD" if item["country"] == "US" else "EUR"
-
-            event = Event(
-                datetime=datetime.fromisoformat(item["date"]),
-                currency=currency,
-                title=item["event"],
-                impact_level="HIGH",
-                description=item.get("description", ""),
-                risk="High volatility expected",
-                market_bias="RISK_OFF",
+            events.append(
+                Event(
+                    datetime=datetime.fromisoformat(item["date"]),
+                    currency="USD" if item["country"] == "US" else "EUR",
+                    title=item["event"],
+                    impact_level="HIGH",
+                    description=item.get("description", ""),
+                    risk="High volatility expected",
+                    market_bias="RISK_OFF",
+                )
             )
-            events.append(event)
 
-        logger.info(f"{len(events)} high-impact events fetched")
         return events
