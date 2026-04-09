@@ -7,7 +7,9 @@ logger = logging.getLogger(__name__)
 
 
 class TelegramAlert:
-    def __init__(self, token: str, chat_id: str):
+    def __init__(self, token: str, chat_id: str):        
+        if not token or not chat_id:
+            raise ValueError("Telegram credentials are missing")
         self.token = token
         self.chat_id = chat_id
         self.url = f"https://api.telegram.org/bot{self.token}/sendMessage"
