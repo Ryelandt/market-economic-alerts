@@ -1,20 +1,35 @@
-from app.sources.auto_calendar import fetch_events
-from app.core.decision_engine import score_event, classify_event
-from app.alerts.telegram_alert import send_daily_summary
-from app.alerts.telegram_alert import send_alert
+import yaml
+import logging
+from app.sources.auto_calendar import AutoCalendarSource
+from app.core.decision_engine import DecisionEngine
+from app.alerts.telegram_alert import TelegramAlert
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("macro-alerts")
+
+
+def load_config():
+    with open("config.yaml", "r") as f:
+        return yaml.safe_load(f)
+
+
 def main():
-    events = fetch_events()
+    config = load_config()
 
-    important_events = []
+    source = AutoCalendarSource(config["calendar"]["api_key"])
+    decision_engine = DecisionEngine()
+    telegram = TelegramAlert(
+        token=config["telegram"]["token"],
+        chat_id=config["telegram"]["chat_id"],
+    )
 
-    for event in events:
-        score = score_event(event)
-        level = classify_event(score)
+    for event in source.fetch_events():
+        allowed, reason = decision_engine.should_alert(event)
+        logger.info(f"{event.title} → {reason}")
 
-        if level in ("CRITICAL", "IMPORTANT"):
-            important_events.append(event)
+        if allowed:
+            telegram.send(event)
 
-    send_daily_summary(important_events)
 
 if __name__ == "__main__":
     main()
