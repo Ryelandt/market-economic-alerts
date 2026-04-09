@@ -10,8 +10,12 @@ logger = logging.getLogger(__name__)
 class AutoCalendarSource:
     BASE_URL = "https://financialmodelingprep.com/api/v3/economic_calendar"
 
-    def __init__(self, api_key: str):
-        self.api_key = api_key
+    
+    def __init__(self):
+        self.api_key = os.environ.get("FMP_API_KEY")
+        if not self.api_key:
+            raise ValueError("FMP_API_KEY is missing")
+
 
     def fetch_events(self) -> List[Event]:
         now = datetime.utcnow()
