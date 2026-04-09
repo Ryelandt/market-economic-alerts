@@ -1,13 +1,23 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from datetime import datetime
-from typing import List, Optional
+from typing import Dict
+
 
 @dataclass
-class EconomicEvent:
-    name: str
+class Event:
     datetime: datetime
-    country: str
-    importance: int  # 1 = faible, 3 = fort
-    forecast: Optional[float]
-    actual: Optional[float]
-    affected_assets: List[str]
+    currency: str
+    title: str
+    impact_level: str  # LOW | MEDIUM | HIGH
+    description: str
+    risk: str
+    market_bias: str  # RISK_ON | RISK_OFF | NEUTRAL
+
+    def to_dict(self) -> Dict:
+        return asdict(self)
+
+    def __repr__(self) -> str:
+        return (
+            f"Event({self.datetime}, {self.currency}, "
+            f"{self.title}, impact={self.impact_level})"
+        )
