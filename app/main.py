@@ -1,6 +1,7 @@
 import yaml
 import logging
-from app.sources.auto_calendar import AutoCalendarSource
+import os
+
 from app.core.decision_engine import DecisionEngine
 from app.alerts.telegram_alert import TelegramAlert
 
@@ -15,31 +16,27 @@ def load_config():
 
 def main():
     config = load_config()
+    logger.info("Application started")
 
-    #source = AutoCalendarSource(config["calendar"]["api_key"])
     decision_engine = DecisionEngine()
-   
+
     telegram = TelegramAlert(
         token=os.environ.get("TELEGRAM_BOT_TOKEN"),
         chat_id=os.environ.get("TELEGRAM_CHAT_ID"),
     )
 
-
-    
-# --- CALENDRIER DÉSACTIVÉ ---
+    # --- CALENDRIER DÉSACTIVÉ ---
     if not config["calendar"]["enabled"]:
         logger.info("Economic calendar is disabled. Nothing to process.")
         return
 
-    # ⬇️ (Plus tard ici tu remettras une source macro)
+    # ⬇️ Plus tard, ici :
     # source = ...
     # events = source.fetch_events()
-
     # for event in events:
     #     allowed, reason = decision_engine.should_alert(event)
     #     if allowed:
     #         telegram.send(event)
-
 
 
 if __name__ == "__main__":
