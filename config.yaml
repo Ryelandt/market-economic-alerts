@@ -1,8 +1,11 @@
-assets:
-  - EURUSD
-  - XAUUSD
-  - BTCUSDT
+app:
+  environment: "local"
 
-alert_levels:
-  - CRITICAL
-  - IMPORTANT
+calendar:
+  enabled: false   # ⬅️ désactivé
+
+alerts:
+  telegram_enabled: true
+
+logging:
+  level: "INFO"
