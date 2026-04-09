@@ -1,97 +1,57 @@
-import os
-import json
-import urllib.parse
-import urllib.request
-from datetime import datetime, date, time, timedelta, timezone
-from app.models.event import EconomicEvent
+import requests
+import logging
+from datetime import datetime, timedelta
+from typing import List
 
-FRED_BASE_URL = "https://api.stlouisfed.org/fred/releases"
+from app.models.event import Event
 
-PARIS_TZ = timezone(timedelta(hours=1))
+logger = logging.getLogger(__name__)
 
 
-def fetch_events():
-    api_key = os.getenv("FRED_API_KEY")
-    if not api_key:
-        print("FRED_API_KEY not set")
-        return []
+class AutoCalendarSource:
+    BASE_URL = "https://financialmodelingprep.com/api/v3/economic_calendar"
 
-    params = {
-        "api_key": api_key,
-        "file_type": "json",
-        "limit": 50
-    }
+    def __init__(self, api_key: str):
+        self.api_key = api_key
 
-    url = f"{FRED_BASE_URL}?{urllib.parse.urlencode(params)}"
+    def fetch_events(self) -> List[Event]:
+        now = datetime.utcnow()
+        end = now + timedelta(days=1)
 
-    try:
-        with urllib.request.urlopen(url, timeout=10) as response:
-            data = json.loads(response.read().decode("utf-8"))
-    except Exception as e:
-        print("FRED API error:", e)
-        return []
+        params = {
+            "from": now.strftime("%Y-%m-%d"),
+            "to": end.strftime("%Y-%m-%d"),
+            "apikey": self.api_key,
+        }
 
-    today = date.today()
-    events = []
+        try:
+            response = requests.get(self.BASE_URL, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+        except Exception as e:
+            logger.error(f"Calendar API error: {e}")
+            return []
 
-    for r in data.get("releases", []):
-        name = r.get("name", "")
+        events: List[Event] = []
 
-      
+        for item in data:
+            if item.get("country") not in {"US", "EU"}:
+                continue
+            if item.get("impact") != "High":
+                continue
 
-        # 🇺🇸 US — publications à 14h30
-        if "Consumer Price Index" in name:
-            event_time = time(14, 30)
-            importance = 3
-            assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
-        
-        elif "Employment Situation" in name:
-            event_time = time(14, 30)
-            importance = 3
-            assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
-        
-        elif "Retail Sales" in name:
-            event_time = time(14, 30)
-            importance = 2
-            assets = ["EURUSD", "XAUUSD"]
-        
-        # 🇪🇺 Europe — matin / début d’après‑midi
-        elif "ECB" in name or "European Central Bank" in name:
-            event_time = time(14, 15)
-            importance = 3
-            assets = ["EURUSD", "XAUUSD"]
-        
-        elif "Germany" in name and "Consumer Price" in name:
-            event_time = time(8, 00)
-            importance = 2
-            assets = ["EURUSD"]
-        
-        # 🇺🇸 Soir US
-        elif "FOMC Statement" in name:
-            event_time = time(20, 00)
-            importance = 3
-            assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
-        
-        elif "FOMC Press Conference" in name:
-            event_time = time(20, 30)
-            importance = 3
-            assets = ["EURUSD", "XAUUSD", "BTCUSDT"]
-        
-        else:
-            continue
-        
-        event_datetime = datetime.combine(today, event_time, PARIS_TZ)
+            currency = "USD" if item["country"] == "US" else "EUR"
 
-        events.append(
-            EconomicEvent(
-                name=name,
-                datetime=event_datetime,
-                country="US",
-                importance=importance,
-                forecast=None,
-                actual=None,
-                affected_assets=assets
+            event = Event(
+                datetime=datetime.fromisoformat(item["date"]),
+                currency=currency,
+                title=item["event"],
+                impact_level="HIGH",
+                description=item.get("description", ""),
+                risk="High volatility expected",
+                market_bias="RISK_OFF",
             )
-        )
+            events.append(event)
 
-    return events
+        logger.info(f"{len(events)} high-impact events fetched")
+        return events
