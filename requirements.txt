@@ -1,1 +1,2 @@
 python-dateutil
+PyYAML>=6.0
