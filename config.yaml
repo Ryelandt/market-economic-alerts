@@ -2,7 +2,7 @@ app:
   environment: "local"
 
 calendar:
-  enabled: true   # ⬅️ désactivé
+  enabled: false   # ⬅️ désactivé
 
 alerts:
   telegram_enabled: true
