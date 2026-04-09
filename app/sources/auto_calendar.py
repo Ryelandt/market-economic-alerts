@@ -8,6 +8,13 @@ logger = logging.getLogger(__name__)
 
 
 class AutoCalendarSource:
+    
+    def __init__(self):
+        raise RuntimeError(
+            "AutoCalendarSource is disabled. "
+            "Legacy FMP endpoint is no longer available."
+        )
+
     BASE_URL = "https://financialmodelingprep.com/api/v3/economic_calendar"
 
     
