@@ -18,10 +18,12 @@ def main():
 
     source = AutoCalendarSource(config["calendar"]["api_key"])
     decision_engine = DecisionEngine()
+   
     telegram = TelegramAlert(
-        token=config["telegram"]["token"],
-        chat_id=config["telegram"]["chat_id"],
+        token=os.environ.get("TELEGRAM_BOT_TOKEN"),
+        chat_id=os.environ.get("TELEGRAM_CHAT_ID"),
     )
+
 
     for event in source.fetch_events():
         allowed, reason = decision_engine.should_alert(event)
