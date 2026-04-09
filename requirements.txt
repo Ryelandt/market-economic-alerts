@@ -1,2 +1,3 @@
 python-dateutil
 PyYAML>=6.0
+requests>=2.28
