@@ -16,7 +16,7 @@ def load_config():
 def main():
     config = load_config()
 
-    source = AutoCalendarSource(config["calendar"]["api_key"])
+    #source = AutoCalendarSource(config["calendar"]["api_key"])
     decision_engine = DecisionEngine()
    
     telegram = TelegramAlert(
