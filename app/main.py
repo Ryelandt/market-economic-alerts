@@ -25,12 +25,21 @@ def main():
     )
 
 
-    for event in source.fetch_events():
-        allowed, reason = decision_engine.should_alert(event)
-        logger.info(f"{event.title} → {reason}")
+    
+# --- CALENDRIER DÉSACTIVÉ ---
+    if not config["calendar"]["enabled"]:
+        logger.info("Economic calendar is disabled. Nothing to process.")
+        return
 
-        if allowed:
-            telegram.send(event)
+    # ⬇️ (Plus tard ici tu remettras une source macro)
+    # source = ...
+    # events = source.fetch_events()
+
+    # for event in events:
+    #     allowed, reason = decision_engine.should_alert(event)
+    #     if allowed:
+    #         telegram.send(event)
+
 
 
 if __name__ == "__main__":
