@@ -1,20 +1,21 @@
-def score_event(event):
-    score = 0
-
-    # importance officielle
-    score += event.importance * 30
-
-    # actifs surveillés (toi)
-    tracked_assets = {"EURUSD", "XAUUSD", "BTCUSDT"}
-    if tracked_assets.intersection(event.affected_assets):
-        score += 30
-
-    return score
+from datetime import datetime, timedelta
+from typing import Tuple
+from app.models.event import Event
 
 
-def classify_event(score):
-    if score >= 80:
-        return "CRITICAL"
-    elif score >= 50:
-        return "IMPORTANT"
-    return "IGNORE"
+class DecisionEngine:
+    ALERT_WINDOW = timedelta(hours=2)
+
+    def should_alert(self, event: Event) -> Tuple[bool, str]:
+        now = datetime.utcnow()
+
+        if event.datetime <= now:
+            return False, "Event already passed"
+
+        if event.datetime - now > self.ALERT_WINDOW:
+            return False, "Event too far"
+
+        if event.impact_level != "HIGH":
+            return False, "Impact insufficient"
+
+        return True, "High-impact macro event imminent"
