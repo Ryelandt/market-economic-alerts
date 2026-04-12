@@ -4,6 +4,7 @@ import os
 
 from app.core.decision_engine import DecisionEngine
 from app.alerts.telegram_alert import TelegramAlert
+from app.models.event import Even
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("macro-alerts")
