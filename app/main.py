@@ -42,7 +42,7 @@ def main():
     )
 
     telegram.send(event)
-    logger.info("Test Telegram alert sent successfully"
+    logger.info("Test Telegram alert sent successfully")
 
     # ⬇️ Plus tard, ici :
     # source = ...
