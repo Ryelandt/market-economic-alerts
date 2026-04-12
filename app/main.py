@@ -29,6 +29,20 @@ def main():
     if not config["calendar"]["enabled"]:
         logger.info("Economic calendar is disabled. Nothing to process.")
         return
+    
+    # ✅ EVENT MOCK
+    event = Event(
+        datetime=datetime.utcnow() + timedelta(minutes=10),
+        currency="USD",
+        title="✅ TEST TELEGRAM ALERT",
+        impact_level="HIGH",
+        description="This is a manual test event",
+        risk="No risk - test only",
+        market_bias="NEUTRAL",
+    )
+
+    telegram.send(event)
+    logger.info("Test Telegram alert sent successfully"
 
     # ⬇️ Plus tard, ici :
     # source = ...
