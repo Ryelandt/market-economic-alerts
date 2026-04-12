@@ -24,7 +24,7 @@ def main():
         token=os.environ.get("TELEGRAM_BOT_TOKEN"),
         chat_id=os.environ.get("TELEGRAM_CHAT_ID"),
     )
-      # ✅ EVENT MOCK
+  # ✅ EVENT MOCK
     event = Event(
         datetime=datetime.utcnow() + timedelta(minutes=10),
         currency="USD",
@@ -36,21 +36,7 @@ def main():
     )
 
     telegram.send(event)
-    logger.info("Test Telegram alert sent successfully")
-    # --- CALENDRIER DÉSACTIVÉ ---
-    if not config["calendar"]["enabled"]:
-        logger.info("Economic calendar is disabled. Nothing to process.")
-        return
-    
-  
-
-    # ⬇️ Plus tard, ici :
-    # source = ...
-    # events = source.fetch_events()
-    # for event in events:
-    #     allowed, reason = decision_engine.should_alert(event)
-    #     if allowed:
-    #         telegram.send(event)
+    logger.info("Test Telegram alert sent successfully")  
 
 
 if __name__ == "__main__":
