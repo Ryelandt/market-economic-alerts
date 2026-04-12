@@ -28,6 +28,17 @@ class TelegramAlert:
         payload = {
             "chat_id": self.chat_id,
             "text": message,
+            "reply_markup": {
+                "inline_keyboard": [
+                    [
+                        {
+                            "text": "🔁 Relancer le batch maintenant",
+                            "callback_data": "RERUN_BATCH"
+                        }
+                    ]
+                ]
+            }
+
         }
 
         try:
